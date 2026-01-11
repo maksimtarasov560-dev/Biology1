@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Тест: сперматогенез и оогенез (10 вопросов)</title>
+  <style>
+    :root{
+      --bg1:#f7f1ff;
+      --bg2:#efe8ff;
+      --card:#ffffffcc;
+      --ink:#1f1633;
+      --muted:#5c4a78;
+      --accent:#7c3aed;
+      --accent2:#22c55e;
+      --bad:#ef4444;
+      --shadow: 0 12px 34px rgba(31,22,51,.12);
+      --radius: 18px;
+    }
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(1100px 520px at 10% 10%, rgba(124,58,237,.14), transparent 55%),
+        radial-gradient(900px 460px at 90% 18%, rgba(34,197,94,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg1), var(--bg2));
+      min-height:100svh;
+      padding: 16px;
+    }
+    .wrap{ max-width: 980px; margin: 0 auto; }
+    header{
+      display:flex; gap:14px; align-items:flex-start; justify-content:space-between;
+      flex-wrap:wrap; margin: 4px 0 14px;
+    }
+    .title{ display:flex; gap:12px; align-items:center; }
+    .badge{
+      width:44px; height:44px; border-radius: 14px;
+      background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,197,94,.85));
+      box-shadow: var(--shadow);
+      position:relative; overflow:hidden;
+    }
+    .badge::after{
+      content:"";
+      position:absolute; inset:-45%;
+      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.55), transparent 45%);
+      transform: rotate(25deg);
+      animation: shimmer 3.8s linear infinite;
+      opacity:.95;
+    }
+    @keyframes shimmer{
+      0%{ transform: translateX(-30%) rotate(25deg); }
+      100%{ transform: translateX(30%) rotate(25deg); }
+    }
+    h1{
+      font-size: clamp(18px, 2.2vw, 26px);
+      margin:0;
+      line-height:1.15;
+    }
+    .sub{ margin:2px 0 0; color:var(--muted); font-size: 13.5px; }
+
+    .topbar{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+      justify-content:flex-end;
+    }
+    .pill{
+      background: rgba(255,255,255,.6);
+      border: 1px solid rgba(124,58,237,.18);
+      border-radius: 999px;
+      padding: 10px 12px;
+      box-shadow: 0 6px 18px rgba(31,22,51,.06);
+      display:flex; gap:10px; align-items:center;
+      min-width: min(520px, 100%);
+    }
+    label{ font-size: 12.5px; color: var(--muted); }
+    input[type="text"]{
+      width:100%;
+      border:none; outline:none;
+      background:transparent;
+      font-size: 14.5px;
+      color: var(--ink);
+    }
+
+    .progress{
+      flex:1;
+      height: 12px;
+      background: rgba(31,22,51,.08);
+      border-radius: 999px;
+      overflow:hidden;
+      min-width: 160px;
+      position:relative;
+    }
+    .bar{
+      height:100%;
+      width:0%;
+      background: linear-gradient(90deg, rgba(124,58,237,.95), rgba(34,197,94,.9));
+      border-radius: 999px;
+      transition: width .6s cubic-bezier(.2,.9,.2,1);
+    }
+    .score{
+      font-weight: 800;
+      padding: 10px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.6);
+      border: 1px solid rgba(124,58,237,.18);
+      box-shadow: 0 6px 18px rgba(31,22,51,.06);
+      white-space: nowrap;
+    }
+
+    .grid{ display:grid; grid-template-columns: 1fr; gap: 14px; }
+    .card{
+      background: var(--card);
+      border: 1px solid rgba(124,58,237,.16);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 14px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      overflow:hidden;
+      position:relative;
+    }
+    .card::before{
+      content:"";
+      position:absolute; inset:-1px;
+      background: radial-gradient(700px 240px at 10% 0%, rgba(124,58,237,.12), transparent 60%),
+                  radial-gradient(700px 240px at 90% 0%, rgba(34,197,94,.10), transparent 60%);
+      pointer-events:none;
+    }
+    .card > *{ position:relative; }
+
+    .qhead{
+      display:flex; align-items:flex-start; justify-content:space-between;
+      gap: 10px; flex-wrap:wrap;
+      margin-bottom: 10px;
+    }
+    .qnum{ display:inline-flex; align-items:center; gap:10px; font-weight:900; }
+    .chip{
+      font-size: 12.5px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(31,22,51,.12);
+      background: rgba(255,255,255,.85);
+      white-space: nowrap;
+    }
+    .chip.ok{ border-color: rgba(34,197,94,.55); background: rgba(34,197,94,.12); }
+    .chip.bad{ border-color: rgba(239,68,68,.55); background: rgba(239,68,68,.10); }
+
+    .qtext{ font-size: 15px; margin: 0 0 10px; line-height: 1.35; }
+    .options{ display:grid; gap:10px; }
+    .opt{
+      width:100%;
+      text-align:left;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid rgba(31,22,51,.10);
+      background: rgba(255,255,255,.78);
+      cursor:pointer;
+      transition: transform .12s ease, box-shadow .2s ease, border-color .2s ease;
+      user-select:none;
+      touch-action: manipulation;
+    }
+    .opt:hover{ transform: translateY(-1px); box-shadow: 0 10px 22px rgba(31,22,51,.10); }
+    .opt:active{ transform: translateY(0px) scale(.99); }
+    .opt[disabled]{ cursor:not-allowed; opacity:.78; }
+    .opt.good{ border-color: rgba(34,197,94,.55); background: rgba(34,197,94,.10); }
+    .opt.bad{ border-color: rgba(239,68,68,.55); background: rgba(239,68,68,.08); }
+
+    .feedback{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      border: 1px dashed rgba(31,22,51,.18);
+      background: rgba(255,255,255,.55);
+      font-size: 13.5px;
+      display:none;
+      gap:10px;
+      align-items:flex-start;
+      transform-origin: top;
+      animation: pop .35s ease;
+    }
+    @keyframes pop{
+      from{ transform: scale(.98); opacity: 0; }
+      to{ transform: scale(1); opacity: 1; }
+    }
+    .emoji{ font-size: 18px; line-height: 1; }
+
+    .btns{ display:flex; gap:10px; flex-wrap:wrap; margin-top: 12px; }
+    button.action{
+      border:none;
+      border-radius: 14px;
+      padding: 12px 14px;
+      cursor:pointer;
+      font-weight: 900;
+      letter-spacing:.2px;
+      transition: transform .12s ease, box-shadow .2s ease;
+      touch-action: manipulation;
+    }
+    .primary{
+      background: linear-gradient(135deg, rgba(124,58,237,.95), rgba(34,197,94,.86));
+      color: white;
+      box-shadow: 0 10px 24px rgba(31,22,51,.16);
+    }
+    .primary:hover{ transform: translateY(-1px); }
+    .primary:active{ transform: translateY(0px) scale(.99); }
+    .ghost{
+      background: rgba(255,255,255,.75);
+      border: 1px solid rgba(31,22,51,.12);
+      color: var(--ink);
+    }
+    .ghost:hover{ transform: translateY(-1px); }
+    .ghost:active{ transform: translateY(0px) scale(.99); }
+
+    .final{
+      display:none;
+      margin-top: 14px;
+      padding: 14px;
+      border-radius: var(--radius);
+      border: 1px solid rgba(31,22,51,.14);
+      background: rgba(255,255,255,.7);
+      animation: pop .35s ease;
+    }
+    .final h3{ margin:0 0 8px; }
+    .small{ color: var(--muted); font-size: 12.5px; margin: 0; }
+
+    footer{ margin: 14px 0 6px; color: var(--muted); font-size: 12px; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="title">
+        <div class="badge" aria-hidden="true"></div>
+        <div>
+          <h1>Тест: сперматогенез и оогенез (10 вопросов)</h1>
+          <p class="sub">Выбор одного ответа • мгновенная обратная связь • итоговая проверка</p>
+        </div>
+      </div>
+
+      <div class="topbar">
+        <div class="pill" role="group" aria-label="Данные ученика">
+          <div style="min-width:150px;">
+            <label for="student">Ученик</label><br/>
+            <input id="student" type="text" placeholder="ФИО / класс" autocomplete="name" />
+          </div>
+          <div class="progress" aria-label="Прогресс">
+            <div class="bar" id="bar"></div>
+          </div>
+        </div>
+        <div class="score" aria-live="polite">Ответы: <span id="done">0</span>/10 • Баллы: <span id="score">0</span>/10</div>
+      </div>
+    </header>
+
+    <main class="grid" id="quiz"></main>
+
+    <section class="card">
+      <div class="btns">
+        <button class="action primary" id="finish">Проверить и получить итог</button>
+        <button class="action ghost" id="reset">Сбросить ответы</button>
+      </div>
+
+      <div class="final" id="final">
+        <h3 id="finalTitle">Итог</h3>
+        <p class="small" id="finalText"></p>
+      </div>
+    </section>
+
+    <footer>Открой файл в браузере. Для отправки через WhatsApp/Telegram лучше использовать ссылку (например, Netlify).</footer>
+  </div>
+
+<script>
+(() => {
+  const data = [
+    { q: "Как называется процесс образования сперматозоидов?",
+      a: ["Оогенез","Сперматогенез","Митоз","Фотосинтез"],
+      c: 1,
+      exp: "Сперматогенез — процесс образования и созревания сперматозоидов в семенниках."
+    },
+    { q: "Как называется процесс образования яйцеклеток?",
+      a: ["Оогенез","Сперматогенез","Гаметолиз","Телофаза"],
+      c: 0,
+      exp: "Оогенез — процесс образования и созревания яйцеклеток в яичниках."
+    },
+    { q: "Где происходит сперматогенез?",
+      a: ["В яичниках","В семенных канальцах семенников","В печени","В сердце"],
+      c: 1,
+      exp: "Сперматогенез протекает в семенных канальцах семенников."
+    },
+    { q: "Какой процесс является ключевым в S‑периоде клеточного цикла, предшествующем мейозу?",
+      a: ["Распад ядерной оболочки","Репликация ДНК","Цитокинез","Деспирализация хромосом"],
+      c: 1,
+      exp: "В S‑периоде происходит удвоение (репликация) ДНК."
+    },
+    { q: "Что происходит на стадии созревания при сперматогенезе?",
+      a: ["Митоз сперматогоний","Мейоз и образование сперматид","Удвоение органоидов","Образование зародышевых листков"],
+      c: 1,
+      exp: "Стадия созревания включает мейоз → образуются сперматиды (гаплоидные клетки)."
+    },
+    { q: "Сколько полноценных гамет обычно образуется из одной исходной клетки при сперматогенезе?",
+      a: ["1","2","3","4"],
+      c: 3,
+      exp: "Из одной исходной клетки после мейоза формируются 4 сперматиды → 4 сперматозоида."
+    },
+    { q: "Почему при оогенезе образуется одна крупная яйцеклетка и полярные тельца?",
+      a: ["Потому что деление цитоплазмы неравномерное","Потому что не происходит мейоз","Потому что яйцеклетка делится митозом","Потому что сперматозоиды сливаются"],
+      c: 0,
+      exp: "При оогенезе деление цитоплазмы неравномерное: ресурсы сохраняются в одной крупной клетке."
+    },
+    { q: "Какое утверждение верно для оогенеза (в целом)?",
+      a: ["Идёт непрерывно всю жизнь","Начинается ещё до рождения и протекает прерывисто","Происходит в семенниках","Дает 4 яйцеклетки из одной клетки"],
+      c: 1,
+      exp: "Оогенез начинается до рождения и идёт прерывисто; обычно формируется 1 яйцеклетка."
+    },
+    { q: "Что такое спермиогенез (стадия формирования)?",
+      a: ["Деление сперматогоний митозом","Превращение сперматид в сперматозоиды","Удвоение ДНК","Образование полярных телец"],
+      c: 1,
+      exp: "Спермиогенез — превращение сперматид в зрелые сперматозоиды (головка, шейка, хвост)."
+    },
+    { q: "Какой набор хромосом имеют зрелые гаметы человека?",
+      a: ["2n","3n","n","4n"],
+      c: 2,
+      exp: "Гаметы имеют гаплоидный набор — n (у человека 23 хромосомы)."
+    }
+  ];
+
+  const quiz = document.getElementById('quiz');
+  const doneEl = document.getElementById('done');
+  const scoreEl = document.getElementById('score');
+  const bar = document.getElementById('bar');
+  const student = document.getElementById('student');
+  const final = document.getElementById('final');
+  const finalTitle = document.getElementById('finalTitle');
+  const finalText = document.getElementById('finalText');
+
+  let chosen = new Array(data.length).fill(null);
+  let locked = new Array(data.length).fill(false);
+
+  const updateTop = () => {
+    const done = chosen.filter(v => v !== null).length;
+    const score = chosen.reduce((acc, v, i) => acc + (v === data[i].c ? 1 : 0), 0);
+    doneEl.textContent = String(done);
+    scoreEl.textContent = String(score);
+    bar.style.width = ((done / data.length) * 100).toFixed(0) + '%';
+  };
+
+  const render = () => {
+    quiz.innerHTML = "";
+    data.forEach((item, idx) => {
+      const card = document.createElement('section');
+      card.className = "card";
+
+      const head = document.createElement('div');
+      head.className = "qhead";
+
+      const left = document.createElement('div');
+      left.className = "qnum";
+      left.innerHTML = `Вопрос ${idx+1} <span class="chip" id="chip${idx}">не отвечен</span>`;
+
+      const right = document.createElement('div');
+      right.className = "chip";
+      right.textContent = "1 балл";
+
+      head.appendChild(left);
+      head.appendChild(right);
+
+      const qtext = document.createElement('p');
+      qtext.className = "qtext";
+      qtext.textContent = item.q;
+
+      const options = document.createElement('div');
+      options.className = "options";
+
+      item.a.forEach((txt, aidx) => {
+        const btn = document.createElement('button');
+        btn.className = "opt";
+        btn.type = "button";
+        btn.textContent = txt;
+
+        btn.addEventListener('click', () => {
+          if (locked[idx]) return;
+
+          chosen[idx] = aidx;
+          locked[idx] = true;
+
+          const buttons = Array.from(options.querySelectorAll('button.opt'));
+          buttons.forEach(b => b.disabled = true);
+
+          buttons[item.c].classList.add('good');
+          if (aidx !== item.c) buttons[aidx].classList.add('bad');
+
+          const fb = card.querySelector('.feedback');
+          const emo = fb.querySelector('.emoji');
+          const text = fb.querySelector('.fbtext');
+
+          fb.style.display = "flex";
+          if (aidx === item.c){
+            emo.textContent = "✅";
+            text.innerHTML = `<b>Верно.</b> ${item.exp}`;
+            const chip = document.getElementById('chip'+idx);
+            chip.textContent = "верно";
+            chip.classList.add('ok');
+          } else {
+            emo.textContent = "❌";
+            text.innerHTML = `<b>Неверно.</b> ${item.exp}`;
+            const chip = document.getElementById('chip'+idx);
+            chip.textContent = "неверно";
+            chip.classList.add('bad');
+          }
+
+          updateTop();
+        }, { passive: true });
+
+        options.appendChild(btn);
+      });
+
+      const fb = document.createElement('div');
+      fb.className = "feedback";
+      fb.innerHTML = `<div class="emoji">✅</div><div class="fbtext"></div>`;
+
+      card.appendChild(head);
+      card.appendChild(qtext);
+      card.appendChild(options);
+      card.appendChild(fb);
+
+      quiz.appendChild(card);
+    });
+
+    updateTop();
+  };
+
+  const finish = () => {
+    const done = chosen.filter(v => v !== null).length;
+    const score = chosen.reduce((acc, v, i) => acc + (v === data[i].c ? 1 : 0), 0);
+
+    final.style.display = "block";
+    const name = (student.value || "Ученик").trim();
+    finalTitle.textContent = `Итог для: ${name}`;
+
+    if (done < data.length){
+      finalText.textContent = `Ты ответил(а) на ${done}/10. Сейчас у тебя ${score}/10 баллов. Заполни оставшиеся вопросы, затем нажми кнопку ещё раз.`;
+    } else {
+      let comment = "Хороший результат!";
+      if (score >= 9) comment = "Отлично! Ты уверенно понимаешь различия сперматогенеза и оогенеза.";
+      else if (score >= 7) comment = "Неплохо! Осталось чуть-чуть закрепить детали стадий и различий.";
+      else if (score >= 5) comment = "Есть база, но нужно повторить стадии и особенности процессов.";
+      else comment = "Нужно повторить теорию: где происходит, стадии, результат (сколько гамет).";
+
+      finalText.textContent = `Готово: 10/10. Итог: ${score}/10. ${comment} Сделай скриншот результата и отправь учителю.`;
+    }
+
+    final.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  };
+
+  const reset = () => {
+    chosen = new Array(data.length).fill(null);
+    locked = new Array(data.length).fill(false);
+    final.style.display = "none";
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  document.getElementById('finish').addEventListener('click', finish, { passive: true });
+  document.getElementById('reset').addEventListener('click', reset, { passive: true });
+
+  render();
+})();
+</script>
+</body>
+</html>
