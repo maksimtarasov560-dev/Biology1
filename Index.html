@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PvZ — Решение задач (12 карточек)</title>
+  <style>
+    :root{
+      --bg1:#0b1220;
+      --bg2:#0a2a18;
+      --cardBorder: rgba(255,255,255,.16);
+      --text:#eafff1;
+      --muted: rgba(234,255,241,.75);
+      --shadow: 0 18px 45px rgba(0,0,0,.45);
+      --radius: 18px;
+    }
+
+    *{box-sizing:border-box}
+    html, body{height:100%}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 700px at 20% 10%, rgba(39,169,79,.25), transparent 60%),
+        radial-gradient(900px 600px at 80% 80%, rgba(0,210,255,.12), transparent 55%),
+        linear-gradient(140deg, var(--bg1), var(--bg2));
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      overflow:hidden;
+    }
+
+    /* 16:9 fullscreen stage */
+    .stage{
+      width:min(100vw, calc(100vh * 16/9));
+      height:min(100vh, calc(100vw * 9/16));
+      aspect-ratio: 16/9;
+      position:relative;
+      padding: clamp(12px, 2.0vw, 26px);
+      display:flex;
+      flex-direction:column;
+      gap: clamp(10px, 1.6vw, 18px);
+    }
+
+    header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+
+    .title{
+      display:flex;
+      align-items:baseline;
+      gap:12px;
+      flex-wrap:wrap;
+    }
+    .title h1{
+      margin:0;
+      font-size: clamp(18px, 2.2vw, 30px);
+      letter-spacing:.3px;
+    }
+    .title .pill{
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.14);
+      color: var(--muted);
+      font-size: clamp(12px, 1.2vw, 14px);
+      backdrop-filter: blur(8px);
+    }
+
+    .hint{
+      text-align:right;
+      color: var(--muted);
+      font-size: clamp(12px, 1.2vw, 14px);
+      line-height:1.25;
+      max-width: 46ch;
+    }
+
+    .grid{
+      flex:1;
+      display:grid;
+      grid-template-columns: repeat(4, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: clamp(10px, 1.6vw, 18px);
+      perspective: 1100px;
+    }
+
+    .tile{
+      position:relative;
+      border-radius: var(--radius);
+      border: 1px solid var(--cardBorder);
+      box-shadow: var(--shadow);
+      cursor:pointer;
+      user-select:none;
+      transform-style:preserve-3d;
+      transition: transform .18s ease, filter .18s ease;
+      overflow:hidden;
+      background: linear-gradient(145deg, rgba(39,169,79,.25), rgba(11,18,32,.25));
+    }
+
+    .tile:hover{
+      transform: translateY(-3px) scale(1.01);
+      filter: brightness(1.05);
+    }
+
+    .tile:active{
+      transform: translateY(0px) scale(.995);
+    }
+
+    .tile .face{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding: 14px;
+      backface-visibility:hidden;
+    }
+
+    /* front */
+    .tile .front{
+      background: linear-gradient(145deg, rgba(39,169,79,.25), rgba(39,169,79,.08));
+    }
+
+    .qmark{
+      width: 62px;
+      height: 62px;
+      border-radius: 16px;
+      display:grid;
+      place-items:center;
+      font-weight: 900;
+      font-size: 34px;
+      color: rgba(234,255,241,.9);
+      background: linear-gradient(145deg, rgba(39,169,79,.55), rgba(39,169,79,.18));
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 10px 24px rgba(0,0,0,.28);
+      transform: rotate(-3deg);
+      transition: transform .22s ease;
+    }
+    .tile:hover .qmark{ transform: rotate(0deg) scale(1.03); }
+
+    /* back (revealed) */
+    .tile .back{
+      transform: rotateY(180deg);
+      align-items:flex-start;
+      justify-content:space-between;
+      flex-direction:column;
+      background: linear-gradient(145deg, rgba(39,169,79,.85), rgba(21,94,54,.85));
+    }
+
+    .badgeRow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      width:100%;
+    }
+    .badge{
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: clamp(12px, 1.1vw, 14px);
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.18);
+    }
+    .mini{
+      color: rgba(234,255,241,.86);
+      font-size: clamp(12px, 1.1vw, 14px);
+      opacity:.95;
+    }
+
+    .tileTitle{
+      font-weight: 900;
+      letter-spacing:.3px;
+      font-size: clamp(16px, 1.8vw, 22px);
+      margin: 10px 0 0;
+      text-shadow: 0 2px 0 rgba(0,0,0,.18);
+    }
+
+    .tilePrompt{
+      margin: 8px 0 0;
+      color: rgba(234,255,241,.92);
+      font-size: clamp(12px, 1.25vw, 15px);
+      line-height: 1.25;
+      display:-webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow:hidden;
+      opacity:.95;
+    }
+
+    .openHint{
+      margin-top:auto;
+      width:100%;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      color: rgba(234,255,241,.84);
+      font-size: clamp(11px, 1.1vw, 13px);
+      padding-top: 10px;
+      border-top: 1px dashed rgba(255,255,255,.2);
+    }
+
+    .tile.revealed{
+      cursor:pointer;
+    }
+    .tile.revealed:hover{
+      transform: translateY(-4px) scale(1.012);
+    }
+
+    .tile.locked{
+      cursor: default;
+    }
+
+    /* flip when revealed */
+    .tile.revealed .inner{
+      transform: rotateY(180deg);
+    }
+
+    .inner{
+      position:absolute;
+      inset:0;
+      transform-style:preserve-3d;
+      transition: transform .55s cubic-bezier(.2,.85,.15,1);
+    }
+
+    /* Modal */
+    .modalOverlay{
+      position:absolute;
+      inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(7px);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding: clamp(12px, 2vw, 28px);
+      z-index: 50;
+    }
+    .modalOverlay.show{ display:flex; }
+
+    .modal{
+      width:min(920px, 92vw);
+      max-height: 86vh;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(15,24,38,.92), rgba(7,12,20,.92));
+      border: 1px solid rgba(255,255,255,.14);
+      box-shadow: 0 30px 80px rgba(0,0,0,.6);
+      overflow:hidden;
+      transform: translateY(14px) scale(.98);
+      opacity:0;
+      animation: pop .22s ease forwards;
+    }
+    @keyframes pop{
+      to{ transform: translateY(0) scale(1); opacity:1; }
+    }
+
+    .modalHeader{
+      padding: 16px 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      background: linear-gradient(90deg, rgba(39,169,79,.18), rgba(0,210,255,.08));
+    }
+
+    .modalTitle{
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      min-width:0;
+    }
+    .modalTitle strong{
+      font-size: 18px;
+      letter-spacing:.2px;
+      white-space:nowrap;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .modalTitle span{
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .closeBtn{
+      appearance:none;
+      border:none;
+      background: rgba(255,255,255,.08);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,.14);
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor:pointer;
+      transition: transform .15s ease, background .15s ease;
+    }
+    .closeBtn:hover{ background: rgba(255,255,255,.12); transform: translateY(-1px); }
+    .closeBtn:active{ transform: translateY(0px); }
+
+    .modalBody{
+      padding: 16px 18px 18px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+    }
+
+    .taskText{
+      font-size: 15px;
+      line-height: 1.45;
+      color: rgba(234,255,241,.94);
+      white-space: pre-wrap;
+    }
+
+    .timerBox{
+      border-radius: 16px;
+      padding: 12px 12px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(255,255,255,.06);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+    }
+    .timerLeft{
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .timerLeft .label{
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .time{
+      font-weight: 900;
+      font-size: 26px;
+      letter-spacing: .6px;
+    }
+    .barWrap{
+      flex:1;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(0,0,0,.25);
+      border: 1px solid rgba(255,255,255,.12);
+      overflow:hidden;
+    }
+    .bar{
+      height:100%;
+      width:100%;
+      background: linear-gradient(90deg, rgba(39,169,79,.95), rgba(0,210,255,.55));
+      transform-origin:left;
+      transform: scaleX(1);
+      transition: transform .2s linear;
+    }
+
+    .modalFoot{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    /* Small screens: keep 16:9 stage */
+    @media (max-width: 820px){
+      .hint{display:none}
+      .grid{gap:12px}
+      .qmark{width:56px;height:56px}
+    }
+  </style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <header>
+      <div class="title">
+        <h1>Решение задач — Plants vs Zombies</h1>
+        <div class="pill">12 квадратиков • 5 задач рандомно • таймер 2:00</div>
+      </div>
+      <div class="hint">
+        Нажмите на зелёный квадрат — он откроется и останется открытым.<br>
+        Нажмите ещё раз на открывшуюся карточку, чтобы увидеть условие + таймер.
+      </div>
+    </header>
+
+    <div class="grid" id="grid"></div>
+
+    <!-- Modal -->
+    <div class="modalOverlay" id="modalOverlay" aria-hidden="true">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalStrong">
+        <div class="modalHeader">
+          <div class="modalTitle">
+            <strong id="modalStrong">Задача</strong>
+            <span id="modalSub">Нажмите «Закрыть» или Esc</span>
+          </div>
+          <button class="closeBtn" id="closeBtn">Закрыть ✕</button>
+        </div>
+
+        <div class="modalBody">
+          <div class="timerBox">
+            <div class="timerLeft">
+              <div class="label">Таймер (2 минуты)</div>
+              <div class="time" id="time">02:00</div>
+            </div>
+            <div class="barWrap" title="Полоса времени">
+              <div class="bar" id="bar"></div>
+            </div>
+          </div>
+
+          <div class="taskText" id="taskText"></div>
+
+          <div class="modalFoot">
+            <div>Подсказка: можно обсуждать понятия <b>тропизмы</b> и <b>настии</b>.</div>
+            <div>Цель: определить тип движения и объяснить причину.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const mainTasks = [
+`Задача 1. Подсолнух и солнечный луч
+В игре Plants vs Zombies подсолнух всегда поворачивается к солнцу, чтобы вырабатывать энергию.
+Но фермер заметил, что если подсолнухи растут в тени, они вытягиваются и становятся слабыми.
+Вопрос:
+Какое движение растений показано в этой ситуации и почему подсолнух поворачивается именно к источнику света?`,
+
+`Задача 2. Корни против ядовитых зомби
+Зомби пролили токсичное вещество рядом с корнями растений. Через некоторое время фермер заметил, что корни начали расти в противоположную сторону.
+Вопрос:
+Как называется такое движение растений и почему оно важно для выживания растения?`,
+
+`Задача 3. Мимоза – ловушка для зомби
+В специальном уровне игры появляется растение, которое мгновенно складывает листья при прикосновении зомби, но не меняет направление роста.
+Вопрос:
+К какому типу движений относится эта реакция и чем она отличается от тропизмов?`,
+
+`Задача 4. Поле фермера и неравный рост растений
+Фермер высадил растения PvZ в два ряда: один – под открытым солнцем, другой – рядом с домом. Растения у стены выросли хуже и наклонились.
+Вопрос:
+Почему растения изменили направление роста и какие экологические группы растений здесь можно выделить?`,
+
+`Задача 5. Корневая защита от подземных зомби
+Подземные зомби атакуют снизу. Фермер замечает, что корни растений всегда растут вглубь почвы, даже если семя положили боком.
+Вопрос:
+Какой тип движения объясняет такое поведение корней и почему оно жизненно важно для растения?`
+  ];
+
+  const extraQuestions = [
+    "Вопрос: Чем отличается фототропизм от гелиотропизма (поворота листьев/цветка за солнцем)?",
+    "Вопрос: Почему у корней обычно наблюдается положительный геотропизм, а у побегов — отрицательный?",
+    "Вопрос: Какое движение поможет корням «найти» воду? Назовите и объясните причину.",
+    "Вопрос: Приведите пример настии (не связанной с направлением раздражителя) в жизни растений.",
+    "Вопрос: Что такое тигмонастия/сеизмонастия? В каких условиях она полезна растению?",
+    "Вопрос: Какое движение объясняет рост побега вверх при падении горшка на бок?",
+    "Вопрос: Зачем растениям избегать вредных веществ в почве? Как называется такое направленное движение?"
+  ];
+
+  const grid = document.getElementById('grid');
+
+  const indices = Array.from({length:12}, (_,i)=>i);
+  shuffle(indices);
+
+  const taskSlots = new Set(indices.slice(0, 5));
+  let mainIndex = 0;
+  let extraIndex = 0;
+
+  const tiles = [];
+
+  for(let i=0;i<12;i++){
+    const tile = document.createElement('div');
+    tile.className = 'tile locked';
+    tile.dataset.state = 'hidden';
+    tile.dataset.index = String(i);
+
+    const inner = document.createElement('div');
+    inner.className = 'inner';
+
+    const front = document.createElement('div');
+    front.className = 'face front';
+    front.innerHTML = '<div class="qmark">?</div>';
+
+    const back = document.createElement('div');
+    back.className = 'face back';
+
+    back.innerHTML = `
+      <div class="badgeRow">
+        <div class="badge">Скрыто</div>
+        <div class="mini">Нажмите, чтобы открыть</div>
+      </div>
+      <div>
+        <div class="tileTitle">...</div>
+        <div class="tilePrompt">...</div>
+      </div>
+      <div class="openHint">
+        <span>Откроется и останется</span>
+        <span>↵ затем открыть условие</span>
+      </div>
+    `;
+
+    inner.appendChild(front);
+    inner.appendChild(back);
+    tile.appendChild(inner);
+    grid.appendChild(tile);
+    tiles.push(tile);
+  }
+
+  const modalOverlay = document.getElementById('modalOverlay');
+  const closeBtn = document.getElementById('closeBtn');
+  const modalStrong = document.getElementById('modalStrong');
+  const taskText = document.getElementById('taskText');
+  const timeEl = document.getElementById('time');
+  const bar = document.getElementById('bar');
+
+  let timerId = null;
+  let endAt = 0;
+  const totalMs = 2 * 60 * 1000;
+
+  function openModal(title, text){
+    modalStrong.textContent = title;
+    taskText.textContent = text;
+
+    modalOverlay.classList.add('show');
+    modalOverlay.setAttribute('aria-hidden', 'false');
+
+    startTimer();
+  }
+
+  function closeModal(){
+    modalOverlay.classList.remove('show');
+    modalOverlay.setAttribute('aria-hidden', 'true');
+    stopTimer();
+  }
+
+  function startTimer(){
+    stopTimer();
+    endAt = Date.now() + totalMs;
+    tick();
+    timerId = setInterval(tick, 200);
+  }
+
+  function stopTimer(){
+    if(timerId) clearInterval(timerId);
+    timerId = null;
+    timeEl.textContent = "02:00";
+    bar.style.transform = "scaleX(1)";
+  }
+
+  function tick(){
+    const left = Math.max(0, endAt - Date.now());
+    const mm = String(Math.floor(left/60000)).padStart(2,'0');
+    const ss = String(Math.floor((left%60000)/1000)).padStart(2,'0');
+    timeEl.textContent = mm + ":" + ss;
+    const progress = left / totalMs;
+    bar.style.transform = "scaleX(" + progress + ")";
+
+    if(left <= 0){
+      clearInterval(timerId);
+      timerId = null;
+      timeEl.textContent = "00:00";
+      if (navigator.vibrate) navigator.vibrate(60);
+    }
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', (e)=>{
+    if(e.target === modalOverlay) closeModal();
+  });
+  window.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && modalOverlay.classList.contains('show')) closeModal();
+  });
+
+  tiles.forEach((tile, i)=>{
+    tile.addEventListener('click', ()=>{
+      const state = tile.dataset.state;
+
+      if(state === 'hidden'){
+        tile.dataset.state = 'revealed';
+
+        const isTask = taskSlots.has(i);
+        let title, full;
+
+        if(isTask){
+          full = mainTasks[mainIndex];
+          title = "Задача " + (mainIndex+1);
+          tile.dataset.kind = "task";
+          tile.dataset.full = full;
+          tile.dataset.title = title;
+          mainIndex++;
+        } else {
+          full = extraQuestions[extraIndex] || "Вопрос: Почему растения вообще «двигаются», если они прикреплены к месту?";
+          title = "Вопрос";
+          tile.dataset.kind = "question";
+          tile.dataset.full = full;
+          tile.dataset.title = title;
+          extraIndex++;
+        }
+
+        const back = tile.querySelector('.back');
+        back.querySelector('.badge').textContent = (tile.dataset.kind === "task") ? "ЗАДАЧА" : "ВОПРОС";
+        back.querySelector('.mini').textContent = "Открыто";
+        back.querySelector('.tileTitle').textContent = title;
+        back.querySelector('.tilePrompt').textContent = (tile.dataset.kind === "task")
+          ? summarizeFirstLine(tile.dataset.full)
+          : tile.dataset.full;
+
+        tile.classList.remove('locked');
+        tile.classList.add('revealed');
+
+        tile.animate(
+          [{transform:'translateY(0) scale(1)'},{transform:'translateY(-6px) scale(1.02)'},{transform:'translateY(0) scale(1)'}],
+          {duration: 360, easing:'cubic-bezier(.2,.9,.2,1)'}
+        );
+        return;
+      }
+
+      if(state === 'revealed'){
+        openModal(tile.dataset.title || "Задача", tile.dataset.full || "");
+      }
+    });
+  });
+
+  function summarizeFirstLine(text){
+    const lines = String(text).split('\n').map(s=>s.trim()).filter(Boolean);
+    return lines[0] ? lines[0] : "Откройте условие";
+  }
+
+  function shuffle(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      const tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr;
+  }
+})();
+</script>
+</body>
+</html>
